@@ -1,6 +1,7 @@
 import xarray as xr
 import numpy as np
 import pandas as pd
+from scipy.stats import pearsonr
 import xarray as xr
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -10,7 +11,6 @@ from netCDF4 import Dataset
 from pathlib import Path
 import os
 import PIL.Image
-from numba import jit
 
 
 # function
@@ -120,13 +120,13 @@ def save_gif(image_frames, save_path, duration):
 
 
 # function
-# calculate correlation between climatological data and certain variable in eath grid
+# calculate correlation between climatological data and certain variable in each grid
 # return : correlation data as xr.Dataset
 # parameters *******************************************
 # ion_con : ion concentration data as xr.Dataset
 # cli_data : climatological dataset as xr.Dataset
 # ******************************************************
-@jit(nogil=True)
+# @jit(nogil=True)
 def calculate_lead_lag_correlation(ion_con, cli_data, ion):
     # Resample climatology data to daily frequency
     cli_data_daily = cli_data.resample(time='D').mean()
@@ -169,3 +169,47 @@ def calculate_lead_lag_correlation(ion_con, cli_data, ion):
 
 
 # function
+# calculate correlation between climatological data and certain variable in each grid
+# return : correlation data as xr.Dataset
+def pr_cor_corr(x, y):
+    print("pearson correlation calculation start")
+    # Check NA values
+    co = np.count_nonzero(~np.isnan(x))
+
+    # If fewer than length of y observations return np.nan
+    if co < len(y):
+        print('I am here')
+        return np.nan, np.nan
+
+    corr, _ = pearsonr(x, y)
+
+    return corr
+
+
+# function
+# calculate p_value between climatological data and certain variable in each grid
+# return : correlation data as xr.Dataset
+def pr_cor_pval(x, y):
+    # Check NA values
+    co = np.count_nonzero(~np.isnan(x))
+
+    # If fewer than length of y observations return np.nan
+    if co < len(y):
+        return np.nan
+
+    # Run the pearson correlation test
+    _, p_value = pearsonr(x, y)
+
+    return p_value
+
+
+def pearsonr_corr(x, y, func=pr_cor_corr, dim='time'):
+    # x = Pixel value, y = a vector containing the date, dim == dimension
+    print(f'x : {x}')
+    print(f'y : {y}')
+    return xr.apply_ufunc(
+        func, x, y,
+        input_core_dims=[[dim], [dim]],
+        vectorize=True,
+        output_dtypes=[float]
+    )

@@ -5,6 +5,9 @@ import pandas as pd
 import xarray as xr
 from netCDF4 import Dataset
 from pathlib import Path
+
+from numpy import datetime64
+
 import utils
 import os
 import PIL.Image
@@ -13,13 +16,20 @@ import PIL.Image
 nc_data = Dataset(r'GW_pricip/interim_daily_200606.nc')
 
 # open GW_pricip\interim_daily_200606.nc using xarray
-xr_data = xr.open_dataset(r'GW_pricip/interim_daily_200606.nc')
-xr_data = xr_data.sortby('time')
+clim_data = xr.open_dataset(r'GW_pricip/interim_daily_200606.nc')
+clim_data = clim_data.sortby('time')
+clim_data = clim_data.resample(time='D').mean()
 
 ion_con = pd.read_csv(r'GW_pricip/ion_concent_daily_2006.csv', encoding='cp949', index_col= 0)
 ion_con.sort_index(inplace=True)
 
-os.chdir(r'result')
+
+# gas_con = xr.open_dataset(r'GW_pricip/gas_con2.nc')
+# gas_con['time'] = gas_con['time'].astype('datetime64[ns]')
+# gas_con = gas_con.to_netcdf(r'GW_pricip/gas_con.nc')
+
+gas_con = pd.read_csv(r'GW_pricip/gas_concent_daily_2006.csv', encoding='cp949', index_col=0)
+
 
 # ******************************************************
 # netCDF4 : declare the variables in the dataset
@@ -60,7 +70,7 @@ os.chdir(r'result')
 # ******************************************************
 # xarray: declare the variables in the dataset
 # ******************************************************
-# dt_t2m = xr_data['t2m'] - 273.15
+# dt_t2m = clim_data['t2m'] - 273.15
 # dt_lat = dt_t2m.latitude
 # dt_lon = dt_t2m.longitude
 # dt_time = pd.date_range('2006-06-01', '2006-06-30', freq='D').day
@@ -85,7 +95,10 @@ os.chdir(r'result')
 #
 # utils.save_gif(image_frames, r'xr_t2m.gif', 200)
 
-result = utils.calculate_lead_lag_correlation(ion_con.loc['2006-06-20'], xr_data, 'NO3-')
 
-plt.plot(result['sp'])
+daily_mean_t2m = clim_data['t2m']
+pnt_t2m = daily_mean_t2m.stack(point=('latitude', 'longitude')).groupby('point')
+corr_t2m = utils.pearsonr_corr(pnt_t2m, gas_con['SO2(ppb)']).unstack('point')
 
+
+# plt.plot(result['sp'])
