@@ -2,6 +2,11 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# ******************************************************
+# plot daily gas concentration on June 2006
+# ******************************************************
+
+
 # open csv file as pd
 df = pd.read_csv('GW_pricip/gas_concent_daily_2006.csv', encoding='cp949', index_col=0)
 

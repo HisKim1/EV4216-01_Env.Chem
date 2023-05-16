@@ -9,7 +9,7 @@ df = pd.read_csv('GW_pricip\ion_concent_1997-2021.csv', encoding='cp949', index_
 # calculate total mean of column of NO3-, SO42-, NH4+
 ion_mean = df.mean()
 
-# plot annual data of column of NO3-, SO42-, NH4+
+# plot annual nc_data of column of NO3-, SO42-, NH4+
 plt.figure(figsize=(8, 5))
 plt.plot(df['3'], label='NO3-', color = 'red')
 plt.plot(df['4'], label='SO42-', color = 'blue')

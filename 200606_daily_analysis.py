@@ -1,16 +1,15 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
 import xarray as xr
 from netCDF4 import Dataset
 from pathlib import Path
-
 from numpy import datetime64
-
 import utils
 import os
 import PIL.Image
+
+
 
 # open GW_pricip\interim_daily_200606.nc using netCDF4
 nc_data = Dataset(r'GW_pricip/interim_daily_200606.nc')
@@ -32,7 +31,7 @@ gas_con = pd.read_csv(r'GW_pricip/gas_concent_daily_2006.csv', encoding='cp949',
 
 
 # ******************************************************
-# netCDF4 : declare the variables in the dataset
+# begin: plot daily temperature on June 2006 using netCDF4
 # ******************************************************
 # nc_lat = nc_data.variables['latitude'][:]
 # nc_lon = nc_data.variables['longitude'][:]
@@ -66,9 +65,13 @@ gas_con = pd.read_csv(r'GW_pricip/gas_concent_daily_2006.csv', encoding='cp949',
 # utils.save_gif(image_frames, r't2m.gif', 150)
 # image_frames.clear()
 
+# ******************************************************
+# end
+# ******************************************************
+
 
 # ******************************************************
-# xarray: declare the variables in the dataset
+# begin: plot daily temperature on June 2006 using xarray
 # ******************************************************
 # dt_t2m = clim_data['t2m'] - 273.15
 # dt_lat = dt_t2m.latitude
@@ -94,6 +97,10 @@ gas_con = pd.read_csv(r'GW_pricip/gas_concent_daily_2006.csv', encoding='cp949',
 #     image_frames.append(new_frame)
 #
 # utils.save_gif(image_frames, r'xr_t2m.gif', 200)
+
+# ******************************************************
+# end
+# ******************************************************
 
 
 daily_mean_t2m = clim_data['t2m']
