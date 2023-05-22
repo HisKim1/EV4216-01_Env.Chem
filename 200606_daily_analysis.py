@@ -54,7 +54,7 @@ for var in clim_data.var():
     print(f'start {var}')
     tmp_var = clim_data[var]
     utils.xr_plot_climatology(utils.cor3(tmp_var, gas_con['SO2(ppb)']),
-                              f'{clim_data[var].long_name}',
+                              f'corr_{clim_data[var].long_name}&SO2',
                               f'corr_{var}&SO2.png',
                               -1,
                               1,
@@ -65,7 +65,7 @@ for var in clim_data.var():
     print(f'start {var}')
     tmp_var = clim_data[var]
     utils.xr_plot_climatology(utils.cor3(tmp_var, gas_con['NOx(ppb)']),
-                              f'{clim_data[var].long_name}',
+                              f'corr_{clim_data[var].long_name}&NOx',
                               f'corr_{var}&NOx.png',
                               -1,
                               1,
