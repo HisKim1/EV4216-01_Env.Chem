@@ -1,12 +1,13 @@
 import xarray as xr
 import numpy as np
 import pandas as pd
-from scipy.stats import pearsonr
+from scipy.stats import pearsonr, ConstantInputWarning
 import xarray as xr
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
+import warnings
 from netCDF4 import Dataset
 from pathlib import Path
 import os
@@ -181,6 +182,10 @@ def pr_cor_corr(x, y):
         print('I am here')
         return np.nan, np.nan
 
+    print(f"x : {x}, {x.shape}")
+    print(f"y : {y}, {y.shape}")
+
+    warnings.filterwarnings('ignore', category=ConstantInputWarning)
     corr, _ = pearsonr(x, y)
 
     return corr
@@ -205,11 +210,41 @@ def pr_cor_pval(x, y):
 
 def pearsonr_corr(x, y, func=pr_cor_corr, dim='time'):
     # x = Pixel value, y = a vector containing the date, dim == dimension
-    print(f'x : {x}')
-    print(f'y : {y}')
     return xr.apply_ufunc(
         func, x, y,
         input_core_dims=[[dim], [dim]],
         vectorize=True,
         output_dtypes=[float]
     )
+
+
+def cor_np(x, y):
+    covariance = np.cov(x, y)[0, 1]
+
+    std_x = np.std(x)
+    std_y = np.std(y)
+
+    correlation = covariance / (std_x * std_y)
+    return correlation
+
+def cor3(da1, da2):
+    time = pd.date_range('2006-06-01','2006-06-01',freq="d").day
+    lat = da1.latitude
+    lon = da1.longitude
+    arr = da1.values
+
+    latlontime = []
+    for j in range(lat.size):
+        for i in range(lon.size):
+            if i == 0:
+                lontime_stack = cor_np(arr[:, j, i], da2)
+            else:
+                lontime_piece = cor_np(arr[:,j, i], da2)
+                lontime_stack = np.vstack([lontime_stack, lontime_piece])
+
+        latlontime.append(lontime_stack)
+
+    cor = np.stack(latlontime)
+    corr = xr.DataArray(cor, coords=(lat, lon, time), dims=["lat", "lon", "time"])
+    return corr.transpose("lat", "lon", "time")
+
